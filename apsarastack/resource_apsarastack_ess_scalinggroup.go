@@ -229,18 +229,18 @@ func resourceApsaraStackEssScalingGroupUpdate(d *schema.ResourceData, meta inter
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	if d.HasChange("loadbalancer_ids") {
-		if err != nil {
-			return WrapError(err)
-		}
+	// if d.HasChange("loadbalancer_ids") {
+	// 	if err != nil {
+	// 		return WrapError(err)
+	// 	}
 
-	}
+	// }
 
-	if d.HasChange("db_instance_ids") {
-		if err != nil {
-			return WrapError(err)
-		}
-	}
+	// if d.HasChange("db_instance_ids") {
+	// 	if err != nil {
+	// 		return WrapError(err)
+	// 	}
+	// }
 	d.Partial(false)
 	return resourceApsaraStackEssScalingGroupRead(d, meta)
 }
