@@ -251,7 +251,8 @@ func resourceApsaraStackInstance() *schema.Resource {
 				}, false),
 			},
 
-			"tags": tagsSchema(),
+			"tags":             tagsSchema(),
+			"system_disk_tags": tagsSchema(),
 		},
 	}
 }
@@ -466,6 +467,22 @@ func resourceApsaraStackInstanceUpdate(d *schema.ResourceData, meta interface{})
 			return WrapError(err)
 		} else {
 			d.SetPartial("tags")
+		}
+	}
+
+	if d.HasChange("system_disk_tags") {
+		oraw, nraw := d.GetChange("system_disk_tags")
+		diskid := d.Get("system_disk_id").(string)
+		if diskid == "" {
+			disk, err := ecsService.DescribeInstanceSystemDisk(d.Id(), client.ResourceGroup)
+			if err != nil {
+				return WrapError(err)
+			}
+			diskid = disk.DiskId
+		}
+		err := updateTags(client, []string{diskid}, "disk", oraw, nraw)
+		if err != nil {
+			return WrapError(err)
 		}
 	}
 

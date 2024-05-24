@@ -102,9 +102,13 @@ On other OSs such as Linux, the host name can contain a maximum of 30 characters
     * `snapshot_id` - (Optional, ForceNew) The snapshot ID used to initialize the data disk. If the size specified by snapshot is greater that the size of the disk, use the size specified by snapshot as the size of the data disk.
     * `description` - (Optional, ForceNew) The description must be 2 to 256 characters in length.
     * `delete_with_instance` - (Optional, ForceNew) Delete this data disk when the instance is destroyed. It only works on cloud, cloud_efficiency, cloud_essd, cloud_ssd disk. If the category of this data disk was ephemeral_ssd, please don't set this param.
-
         Default to true
-    
+* `enable_ipv6` - (Optional, ForceNew) Specifies whether to enable the IPv6 block. Valid values: `false` (Default): disables IPv6 blocks. `true`: enables IPv6 blocks. 
+* `ipv6_cidr_block` - (Optional) The ipv6 cidr block of VPC.
+* `ipv6_address_count` - (Optional) The count of ipv6_address requested for allocation. If `enable_ipv6` is true. `ipv6_address_count` must be greater than 0.
+* `system_disk_tags` - (Optional) A additional mapping of tags to assign to the system_disk. 
+    - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
+    - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
 
 ### Timeouts
 

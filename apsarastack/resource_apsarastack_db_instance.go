@@ -379,7 +379,7 @@ func resourceApsaraStackDBInstanceCreate(d *schema.ResourceData, meta interface{
 	d.Set("connection_string", resp.ConnectionString)
 
 	// wait instance status change from Creating to running
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
@@ -450,6 +450,12 @@ func resourceApsaraStackDBInstanceUpdate(d *schema.ResourceData, meta interface{
 	rdsService := RdsService{client}
 	d.Partial(true)
 	stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+
+	if d.HasChange("parameters") {
+		if err := rdsService.ModifyParameters(d, "parameters"); err != nil {
+			return WrapError(err)
+		}
+	}
 
 	if err := rdsService.setInstanceTags(d); err != nil {
 		return WrapError(err)
@@ -818,6 +824,10 @@ func resourceApsaraStackDBInstanceRead(d *schema.ResourceData, meta interface{})
 	d.Set("connection_string", instance.ConnectionString)
 	d.Set("instance_name", instance.DBInstanceDescription)
 	d.Set("maintain_time", instance.MaintainTime)
+
+	if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
+		return WrapError(err)
+	}
 
 	if instance.PayType == string(Prepaid) {
 		request := rds.CreateDescribeInstanceAutoRenewalAttributeRequest()
