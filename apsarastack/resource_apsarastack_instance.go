@@ -135,6 +135,10 @@ func resourceApsaraStackInstance() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 			},
+			"system_disk_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"data_disks": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -342,6 +346,7 @@ func resourceApsaraStackInstanceRead(d *schema.ResourceData, meta interface{}) e
 	d.Set("system_disk_size", disk.Size)
 	d.Set("system_disk_name", disk.DiskName)
 	d.Set("system_disk_description", disk.Description)
+	d.Set("system_disk_id", disk.DiskId)
 	d.Set("instance_name", instance.InstanceName)
 	d.Set("description", instance.Description)
 	d.Set("status", instance.Status)
