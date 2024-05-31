@@ -118,7 +118,7 @@ func resourceApsaraStackEssScalingGroupCreate(d *schema.ResourceData, meta inter
 		return WrapError(err)
 	}
 
-	return resourceApsaraStackEssScalingGroupUpdate(d, meta)
+	return resourceApsaraStackEssScalingGroupRead(d, meta)
 }
 
 func resourceApsaraStackEssScalingGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -223,11 +223,10 @@ func resourceApsaraStackEssScalingGroupUpdate(d *schema.ResourceData, meta inter
 	raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 		return essClient.ModifyScalingGroup(request)
 	})
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), ApsaraStackSdkGoERROR)
 	}
-
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	// if d.HasChange("loadbalancer_ids") {
 	// 	if err != nil {
@@ -293,6 +292,13 @@ func buildApsaraStackEssScalingGroupArgs(d *schema.ResourceData, meta interface{
 	request.MinSize = requests.NewInteger(d.Get("min_size").(int))
 	request.MaxSize = requests.NewInteger(d.Get("max_size").(int))
 	request.DefaultCooldown = requests.NewInteger(d.Get("default_cooldown").(int))
+	request.DefaultCooldown = requests.NewInteger(d.Get("default_cooldown").(int))
+	policyies := expandStringList(d.Get("removal_policies").([]interface{}))
+	s := reflect.ValueOf(request).Elem()
+	for i, p := range policyies {
+		fmt.Printf("[DEBUG] Deleting the %dth removal policy: %s", i+1, p)
+		s.FieldByName(fmt.Sprintf("RemovalPolicy%d", i+1)).Set(reflect.ValueOf(p))
+	}
 
 	if v, ok := d.GetOk("scaling_group_name"); ok && v.(string) != "" {
 		request.ScalingGroupName = v.(string)
