@@ -237,7 +237,12 @@ func (s *EcsService) DescribeInstanceSystemDisk(id, rg string) (disk ecs.Disk, e
 	if len(response.Disks.Disk) < 1 || response.Disks.Disk[0].InstanceId != id {
 		return disk, WrapErrorf(Error(GetNotFoundMessage("Instance", id)), NotFoundMsg, ProviderERROR, response.RequestId)
 	}
-	return response.Disks.Disk[0], nil
+	for _, diskdata := range response.Disks.Disk {
+		if diskdata.InstanceId == id && diskdata.Type == string(DiskTypeSystem) {
+			return diskdata, nil
+		}
+	}
+	return disk, WrapErrorf(Error(GetNotFoundMessage("Instance", id)), NotFoundMsg, ProviderERROR, response.RequestId)
 }
 
 // ResourceAvailable check resource available for zone
